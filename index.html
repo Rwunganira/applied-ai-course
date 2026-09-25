@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A 12-week, project-based course from surveillance data to forecasting, outbreak alerts and evaluated LLM tools.">
 <title>Applied AI for Public Health</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +35,10 @@
   --code-bg:#0A0F0D; --code-ink:#D3DED8;
 }
 *{box-sizing:border-box}
-body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+img{max-width:100%}
+[hidden]{display:none!important}
 .wrap{max-width:860px;margin:0 auto}
 h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.15;margin:0}
 h1{font-size:clamp(2rem,6vw,3.1rem);font-weight:700;letter-spacing:-.02em}
@@ -121,6 +130,8 @@ ol.rules b{font-weight:600}
 .kit p{font-size:.9rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+</head>
+<body>
 
 <div class="wrap">
 <header>
@@ -666,3 +677,5 @@ print(positives.groupby("facility_type")["pred"].mean())   <span class="c"># sen
   }
 })();
 </script>
+</body>
+</html>
