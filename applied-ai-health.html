@@ -141,6 +141,7 @@ ol.rules b{font-weight:600}
       <span style="--pc:var(--p3)"><i></i>Building with LLMs</span>
       <span style="--pc:var(--p4)"><i></i>Responsible AI & portfolio</span>
       <span class="progress" id="progress"></span>
+      <span class="progress" id="sync" aria-live="polite"></span>
     </div>
   </div>
 </header>
@@ -604,16 +605,64 @@ print(positives.groupby("facility_type")["pred"].mean())   <span class="c"># sen
     });
   }
 
-  document.querySelectorAll("input[data-done]").forEach(function(box){
+  var boxes = document.querySelectorAll("input[data-done]");
+  function syncBoxes(){
+    boxes.forEach(function(box){ box.checked = !!done[box.getAttribute("data-done")]; });
+  }
+  function setStatus(text){ document.getElementById("sync").textContent = text; }
+  function saveLocal(){
+    try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e) {}
+  }
+
+  // Progress follows your claude.ai account when this page runs as an artifact;
+  // anywhere else (e.g. GitHub Pages) it stays in this browser.
+  var cloudDoc = null, writing = Promise.resolve();
+  function saveCloud(){
+    if (!cloudDoc) return;
+    var body = { weeks: Object.assign({}, done) };
+    writing = writing.then(function(){ return cloudDoc.set(body); })
+      .then(function(){ setStatus("Synced to your account"); })
+      .catch(function(){ setStatus("Couldn't sync. Saved in this browser only."); });
+  }
+
+  boxes.forEach(function(box){
     var n = box.getAttribute("data-done");
     box.id = "done-" + n;
-    box.checked = !!done[n];
     box.addEventListener("change", function(){
       done[n] = box.checked;
-      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e) {}
+      saveLocal();
+      saveCloud();
       render();
     });
   });
+  syncBoxes();
   render();
+  setStatus("Saved in this browser");
+
+  if (window.claude && typeof window.claude.use === "function") {
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function(r){
+      var db = r[0], user = r[1];
+      if (!db || !user) return null;
+      return user.id().then(function(uid){
+        if (!uid) return;
+        cloudDoc = db.doc("data/users/" + uid + "/progress");
+        var first = true;
+        cloudDoc.onSnapshot(function(snap){
+          if (snap.exists) {
+            var w = (snap.data() || {}).weeks || {};
+            done = {};
+            Object.keys(w).forEach(function(k){ if (w[k]) done[k] = true; });
+            saveLocal(); syncBoxes(); render();
+            setStatus("Synced to your account");
+          } else if (first) {
+            // First visit with sync: carry over anything ticked in this browser.
+            if (Object.keys(done).some(function(k){ return done[k]; })) saveCloud();
+            else setStatus("Synced to your account");
+          }
+          first = false;
+        }, function(){ setStatus("Couldn't sync. Saved in this browser only."); });
+      });
+    }).catch(function(){});
+  }
 })();
 </script>
