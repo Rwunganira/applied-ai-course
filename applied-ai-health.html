@@ -1,0 +1,619 @@
+<title>Applied AI for Public Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F2F4F1; --surface:#FFFFFF; --sunk:#E7ECE8; --ink:#16211D; --muted:#56635D; --line:#D3DBD6;
+  --accent:#1E6B52; --accent-soft:#D6EBE2; --signal:#9A6412; --signal-soft:#F4E6CC;
+  --p1:#5B7F95; --p2:#1E6B52; --p3:#7A5AA6; --p4:#9A6412;
+  --code-bg:#1B2622; --code-ink:#DDE7E2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0F1513; --surface:#171F1C; --sunk:#1E2824; --ink:#E4EBE7; --muted:#97A49E; --line:#2C3833;
+    --accent:#6FCBA8; --accent-soft:#1D3A30; --signal:#E0A94A; --signal-soft:#3A2E17;
+    --p1:#8FB3C9; --p2:#6FCBA8; --p3:#B79BE0; --p4:#E0A94A;
+    --code-bg:#0A0F0D; --code-ink:#D3DED8;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0F1513; --surface:#171F1C; --sunk:#1E2824; --ink:#E4EBE7; --muted:#97A49E; --line:#2C3833;
+  --accent:#6FCBA8; --accent-soft:#1D3A30; --signal:#E0A94A; --signal-soft:#3A2E17;
+  --p1:#8FB3C9; --p2:#6FCBA8; --p3:#B79BE0; --p4:#E0A94A;
+  --code-bg:#0A0F0D; --code-ink:#D3DED8;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:860px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,6vw,3.1rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.prose{max-width:66ch}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--sunk);padding:.1em .35em;border-radius:4px}
+
+/* header */
+header{padding-block:48px 28px;display:grid;gap:18px}
+.lede{font-size:1.12rem;color:var(--muted);max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.92rem}
+.facts b{font-weight:600}
+
+/* week track */
+.track{margin-top:8px;display:grid;gap:10px}
+.track-cells{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.cell{display:block;height:44px;border-radius:3px;background:var(--sunk);position:relative;text-decoration:none;color:var(--muted);font-family:var(--mono);font-size:.7rem;border:1px solid transparent}
+.cell span{position:absolute;left:5px;bottom:3px}
+.cell::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:3px 3px 0 0;background:var(--pc)}
+.cell.done{background:var(--pc);color:var(--surface)}
+.cell:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.track-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.82rem;color:var(--muted)}
+.track-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--pc);margin-right:6px;vertical-align:-1px}
+.progress{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+
+section{padding-block:36px 8px;display:grid;gap:18px}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0 0}
+
+/* rhythm */
+.rhythm{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.rhythm div{background:var(--surface);padding:14px 14px 16px;display:grid;gap:4px;align-content:start}
+.rhythm .hrs{font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+.rhythm b{font-family:var(--display);font-size:1.05rem}
+.rhythm p{font-size:.88rem;color:var(--muted)}
+@media (max-width:700px){.rhythm{grid-template-columns:1fr 1fr}.rhythm div:last-child{grid-column:1/-1}}
+
+/* phases */
+.phase{padding-block:40px 0;display:grid;gap:14px}
+.phase-head{display:grid;gap:6px;border-left:4px solid var(--pc);padding-left:14px}
+.phase-head p{color:var(--muted);max-width:62ch}
+
+details.week{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+details.week[open]{border-color:color-mix(in srgb,var(--pc) 45%,var(--line))}
+details.week>summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 16px;align-items:start}
+details.week>summary::-webkit-details-marker{display:none}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:8px}
+.wk{font-family:var(--mono);font-size:.78rem;color:var(--pc);padding-top:4px;white-space:nowrap}
+.sum-title{display:grid;gap:2px}
+.sum-title small{color:var(--muted);font-size:.9rem}
+.chev{font-family:var(--mono);color:var(--muted);padding-top:2px;transition:transform .15s}
+details[open] .chev{transform:rotate(90deg)}
+.donemark{font-family:var(--mono);font-size:.7rem;color:var(--pc);border:1px solid currentColor;border-radius:99px;padding:0 7px;margin-left:8px;vertical-align:2px}
+.week-body{padding:4px 18px 20px;display:grid;gap:18px}
+.block{display:grid;gap:8px}
+.block h4{margin:0;font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.analogy{background:var(--accent-soft);border-radius:6px;padding:12px 14px;font-size:.96rem}
+.analogy b{font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:.82rem;line-height:1.55;padding:14px 16px;border-radius:6px;overflow-x:auto}
+pre .c{color:#8FA89C}
+.task{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.tag.ex{background:var(--sunk);color:var(--ink)}
+.tag.build{background:var(--signal-soft);color:var(--signal)}
+ul.tight{margin:0;padding-left:1.1em;display:grid;gap:4px}
+.mark{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px dashed var(--line);font-size:.92rem}
+.mark input{width:18px;height:18px;accent-color:var(--pc)}
+
+/* 2x2 */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:center}
+th{background:var(--sunk);font-weight:600}
+td.hit{background:var(--accent-soft)}
+.note{font-size:.85rem;color:var(--muted)}
+
+/* delivery */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.two{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:10px;align-content:start}
+.panel.lead{border-color:var(--accent)}
+ol.rules{margin:0;padding-left:1.2em;display:grid;gap:10px}
+ol.rules b{font-weight:600}
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.kit div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:6px;align-content:start}
+.kit p{font-size:.9rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">A 12-week, project-based self-study course</div>
+  <h1>Applied AI for Public Health</h1>
+  <p class="lede">You'll go from surveillance data you already understand to forecasting models, outbreak alerts and LLM tools that answer questions from WHO guidance. Each week adds a working piece to EpiTracker, so by week 12 you have a portfolio, not a certificate.</p>
+  <div class="facts">
+    <span><b>Length</b> 12 weeks</span>
+    <span><b>Time</b> ~8 hours a week</span>
+    <span><b>Language</b> Python</span>
+    <span><b>Starting point</b> pandas, Flask, Streamlit</span>
+  </div>
+  <div class="track" aria-label="Course progress by week">
+    <div class="track-cells" id="track"></div>
+    <div class="track-legend">
+      <span style="--pc:var(--p1)"><i></i>Data foundations</span>
+      <span style="--pc:var(--p2)"><i></i>Applied machine learning</span>
+      <span style="--pc:var(--p3)"><i></i>Building with LLMs</span>
+      <span style="--pc:var(--p4)"><i></i>Responsible AI & portfolio</span>
+      <span class="progress" id="progress"></span>
+    </div>
+  </div>
+</header>
+
+<section id="rhythm">
+  <div class="eyebrow">Every week works the same way</div>
+  <h2>The weekly rhythm</h2>
+  <p class="prose">Every week has the same five steps. A fixed routine means you spend your energy learning, not planning what to do next.</p>
+  <div class="rhythm">
+    <div><span class="hrs">2 h</span><b>Learn</b><p>Read the concept and the plain-language explanation below.</p></div>
+    <div><span class="hrs">1 h</span><b>Try</b><p>Type out the example yourself and run it. Don't copy and paste it.</p></div>
+    <div><span class="hrs">2 h</span><b>Practise</b><p>Do the exercise on a new dataset.</p></div>
+    <div><span class="hrs">2.5 h</span><b>Build</b><p>Add this week's feature to EpiTracker.</p></div>
+    <div><span class="hrs">30 min</span><b>Reflect</b><p>Write 5 lines in your build log: what worked, what broke, what's still unclear.</p></div>
+  </div>
+</section>
+
+<!-- PHASE 1 -->
+<div class="phase" style="--pc:var(--p1)">
+  <div class="phase-head">
+    <div class="eyebrow">Weeks 1–3</div>
+    <h2>Data foundations</h2>
+    <p>All AI rests on clean data. You already work with line lists. Here you'll make that data reliable, reproducible and ready for models.</p>
+  </div>
+
+  <details class="week" id="w1" data-week="1" open>
+    <summary><span class="wk">WEEK 01</span><span class="sum-title"><h3>From line list to weekly counts</h3><small>pandas for surveillance data</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">A line list has one row per case. Almost every model in this course needs something different: one row per district per week, with a count. Turning the first into the second, correctly, is the most useful data skill in public health AI.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> the line list is the register at the health centre. Weekly counts are the tally sheet you send to the district. The model only ever sees the tally sheet.</div>
+      <div class="block"><h4>Simple example</h4>
+<pre><span class="c"># one row per case  →  one row per district per week</span>
+import pandas as pd
+
+cases = pd.read_csv("line_list.csv", parse_dates=["onset_date"])
+
+weekly = (cases
+    .groupby(["district", pd.Grouper(key="onset_date", freq="W-MON")])
+    .size()
+    .rename("cases")
+    .reset_index())
+
+<span class="c"># the trap: weeks with zero cases are missing, not 0</span>
+full = (weekly.set_index(["district", "onset_date"])
+    .unstack(fill_value=0).stack()
+    .reset_index())</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Simulate a line list of 2,000 cases over 3 districts and 2 years (random dates, ages and sexes). Produce weekly counts with zeros filled in, then plot one district.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a Streamlit page to EpiTracker, “Weekly counts”, with a district selector and a line chart.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" id="done-1" data-done="1"> I finished week 1</label>
+    </div>
+  </details>
+
+  <details class="week" id="w2" data-week="2">
+    <summary><span class="wk">WEEK 02</span><span class="sum-title"><h3>SQL, APIs and DHIS2</h3><small>Getting data out of the systems where it lives</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">Real surveillance data lives in databases and in DHIS2, not in CSV files. SQL lets you ask a database a question. An API lets your code ask another system (like DHIS2) for data automatically, so nobody has to export spreadsheets by hand.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> SQL is asking the records clerk a precise question. An API is a standing arrangement where the clerk sends the answer to your office every Monday, without being asked.</div>
+      <div class="block"><h4>Simple example</h4>
+<pre><span class="c">-- the week-1 aggregation, done by the database instead</span>
+SELECT district,
+       date_trunc('week', onset_date) AS week,
+       COUNT(*)                       AS cases
+FROM   cases
+GROUP  BY district, week
+ORDER  BY district, week;</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Load your simulated line list into SQLite or Postgres and write 5 queries: cases per week, attack rate by age group, median onset-to-report delay, the top 3 districts, and cases in the last 4 weeks.</p></div>
+        <div class="task"><span class="tag ex">Exercise</span><p>Use the DHIS2 public demo instance (linked from dhis2.org) to pull one data element through the Web API with Python <code>requests</code>.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Replace EpiTracker's CSV loading with a database query, and add a scheduled job that refreshes the data.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="2"> I finished week 2</label>
+    </div>
+  </details>
+
+  <details class="week" id="w3" data-week="3">
+    <summary><span class="wk">WEEK 03</span><span class="sum-title"><h3>How machine learning actually thinks</h3><small>Training, testing, overfitting, baselines</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">A machine-learning model learns patterns from past examples, and you judge it only on examples it has never seen. There are three rules. Hold data back for testing. With time data, never let the model see the future. And always compare against a simple baseline. A model that can't beat “next week will be the same as this week” is not worth having.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a student who memorises last year's exam answers scores 100% on last year's exam and fails this year's. That is <b>overfitting</b>. The test set is this year's exam.</div>
+      <div class="block"><h4>Simple example: the baseline every model must beat</h4>
+<pre><span class="c"># "naive" forecast: next week = this week</span>
+df = full.sort_values(["district", "onset_date"])
+df["prediction"] = df.groupby("district")["cases"].shift(1)
+
+mae = (df["cases"] - df["prediction"]).abs().mean()
+print(f"Baseline is off by {mae:.1f} cases per week on average")</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Split your data by time: train on year 1, test on year 2. Compute the naive baseline and a “same week last year” baseline. Which is better, and why?</p></div>
+        <div class="task"><span class="tag build">Build</span><p>No new feature this week. Write a one-page note in your build log explaining overfitting to a colleague who has never coded.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="3"> I finished week 3</label>
+    </div>
+  </details>
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase" style="--pc:var(--p2)">
+  <div class="phase-head">
+    <div class="eyebrow">Weeks 4–6</div>
+    <h2>Applied machine learning</h2>
+    <p>This is where your epidemiology background is an advantage. Much of machine learning evaluation is sensitivity, specificity and surveillance thresholds under different names.</p>
+  </div>
+
+  <details class="week" id="w4" data-week="4">
+    <summary><span class="wk">WEEK 04</span><span class="sum-title"><h3>Classification: is this suspected case likely confirmed?</h3><small>Logistic regression, gradient boosting, the 2×2 table</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">A classifier sorts things into groups, such as “likely lab-confirmed” or “likely not”. You already know how to judge one: the confusion matrix is the 2×2 table you use to evaluate a diagnostic test.</p></div>
+      <div class="block"><h4>You already know this table</h4>
+        <div class="tbl-wrap"><table>
+          <tr><th></th><th>Lab positive</th><th>Lab negative</th></tr>
+          <tr><th>Model says positive</th><td class="hit">42 &nbsp;TP</td><td>15 &nbsp;FP</td></tr>
+          <tr><th>Model says negative</th><td>8 &nbsp;FN</td><td class="hit">135 &nbsp;TN</td></tr>
+        </table></div>
+        <p class="note">Example numbers. Sensitivity = 42 / 50 = 84%. Specificity = 135 / 150 = 90%. In machine learning, sensitivity is called <b>recall</b>.</p>
+      </div>
+      <div class="block"><h4>Simple example</h4>
+<pre>from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
+
+X = df[["fever", "rash", "cough", "age_years", "vaccinated"]]
+y = df["lab_confirmed"]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, stratify=y, random_state=1)
+
+model = LogisticRegression(max_iter=1000).fit(X_train, y_train)
+tn, fp, fn, tp = confusion_matrix(y_test, model.predict(X_test)).ravel()
+print("sensitivity", tp / (tp + fn), "specificity", tn / (tn + fp))</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Simulate suspected measles cases in which symptoms and vaccination status change the chance of confirmation. Fit logistic regression, then <code>HistGradientBoostingClassifier</code>. Lower the probability threshold from 0.5 to 0.3. What happens to sensitivity, and when would you want that trade-off?</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a “triage score” column to EpiTracker's case view, showing the model's probability next to each pending lab result.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="4"> I finished week 4</label>
+    </div>
+  </details>
+
+  <details class="week" id="w5" data-week="5">
+    <summary><span class="wk">WEEK 05</span><span class="sum-title"><h3>Forecasting next month's cases</h3><small>Time series, lag features, seasonality</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">To forecast, turn the past into columns. “Cases 1 week ago”, “2 weeks ago” and “52 weeks ago” become features, and the model learns how they relate to this week. Seasonal diseases like malaria and influenza reward the 52-week lag.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a district officer who says “it's March, rains just started, and cases rose the last two weeks, so expect more” is doing lag-feature forecasting in their head.</div>
+      <div class="block"><h4>Simple example</h4>
+<pre>from sklearn.ensemble import HistGradientBoostingRegressor
+
+for lag in [1, 2, 3, 52]:
+    df[f"lag_{lag}"] = df.groupby("district")["cases"].shift(lag)
+
+features = ["lag_1", "lag_2", "lag_3", "lag_52"]
+train = df[df["onset_date"] &lt;  "2025-01-01"]
+test  = df[df["onset_date"] &gt;= "2025-01-01"]   <span class="c"># never shuffle time data</span>
+
+model = HistGradientBoostingRegressor().fit(train[features], train["cases"])
+test_mae = (test["cases"] - model.predict(test[features])).abs().mean()
+<span class="c"># compare with your week-3 baseline: did it actually help?</span></pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Download a real seasonal series, for example national malaria or influenza data from the WHO Global Health Observatory or FluNet. Beat the seasonal-naive baseline and report the error in cases per week.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a “4-week forecast” Streamlit page to EpiTracker. Show the forecast with an uncertainty band, and write the baseline error next to the model error.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="5"> I finished week 5</label>
+    </div>
+  </details>
+
+  <details class="week" id="w6" data-week="6">
+    <summary><span class="wk">WEEK 06</span><span class="sum-title"><h3>Outbreak signals: anomaly detection</h3><small>EARS-style thresholds, false alarms, Farrington</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">Anomaly detection asks: is this week unusually high compared with what's normal here? The classic surveillance method, EARS C2, compares today with the average of recent days, leaving a short gap in between so a rising outbreak doesn't hide itself in its own baseline.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a smoke alarm. Set it too sensitive and it goes off every time you cook, so people stop listening. Set it too loose and it misses the fire. You tune it by counting false alarms.</div>
+      <div class="block"><h4>Simple example (EARS C2 on daily counts)</h4>
+<pre>g = daily.groupby("district")["cases"]
+<span class="c"># baseline = days t-3 … t-9 (7 days, 2-day guard band)</span>
+mean = g.transform(lambda s: s.shift(3).rolling(7).mean())
+sd   = g.transform(lambda s: s.shift(3).rolling(7).std())
+
+daily["alert"] = daily["cases"] &gt; mean + 3 * sd</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Inject 3 artificial outbreaks into a year of simulated data. Run C2 and count how many outbreaks it caught, how many days late, and how many false alarms it raised. Then try the Farrington method (the R <code>surveillance</code> package) on weekly data and compare.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add an “Alerts” page to EpiTracker listing districts that crossed the threshold this week, with a chart that shows why.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="6"> I finished week 6</label>
+    </div>
+  </details>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase" style="--pc:var(--p3)">
+  <div class="phase-head">
+    <div class="eyebrow">Weeks 7–10</div>
+    <h2>Building with LLMs</h2>
+    <p>This is where most current AI jobs are. You won't train a language model. You'll learn to connect one to your data and tools, and then prove it works.</p>
+  </div>
+
+  <details class="week" id="w7" data-week="7">
+    <summary><span class="wk">WEEK 07</span><span class="sum-title"><h3>LLM basics and structured extraction</h3><small>Tokens, context, prompts, JSON output</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">A large language model reads text and predicts a continuation. It is excellent at language and can be confidently wrong about facts. The most dependable first use is <b>extraction</b>: turning messy free text into clean fields your code can check.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a very fast data clerk who has read everything but has never visited your district. Give it exact instructions and a form to fill in, then check its work.</div>
+      <div class="block"><h4>Simple example: free-text note → case record</h4>
+<pre>from pydantic import BaseModel
+import anthropic
+
+class CaseReport(BaseModel):
+    age_years: int | None
+    sex: str | None
+    symptoms: list[str]
+    onset_date: str | None
+    suspected_disease: str | None
+
+client = anthropic.Anthropic()
+note = "Pt 34F, fever and bloody diarrhoea since 12 Sept, 3 household contacts ill."
+
+response = client.messages.parse(
+    model="claude-opus-5",
+    max_tokens=1024,
+    messages=[{"role": "user",
+               "content": f"Extract the case details from this clinical note:\n{note}"}],
+    output_format=CaseReport,
+)
+print(response.parsed_output)   <span class="c"># a validated CaseReport, not loose text</span></pre>
+        <p class="note">Use simulated or de-identified notes only. Week 11 covers why.</p>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Write 20 realistic fake notes, including hard ones: missing dates, local abbreviations, and two languages mixed. Hand-label the correct answers. How many did the model get fully right?</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a “Paste a report” box to EpiTracker that pre-fills the case form from a note. A person still confirms before saving.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="7"> I finished week 7</label>
+    </div>
+  </details>
+
+  <details class="week" id="w8" data-week="8">
+    <summary><span class="wk">WEEK 08</span><span class="sum-title"><h3>RAG: answering from your own documents</h3><small>Chunking, retrieval, grounded answers with sources</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">RAG (retrieval-augmented generation) answers a question in three steps. Find the passages in your documents most related to the question. Give only those passages to the model. Tell it to answer from them and cite them. This is how you make an AI answer from WHO case definitions instead of from memory.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a closed-book exam versus an open-book exam. RAG turns every question into an open-book exam, and a good answer points to the page.</div>
+      <div class="block"><h4>Simple example: retrieval with no extra services</h4>
+<pre>from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+chunks = load_paragraphs("guidelines/")   <span class="c"># your own helper: one paragraph per item</span>
+vec = TfidfVectorizer().fit(chunks)
+doc_matrix = vec.transform(chunks)
+
+def retrieve(question, k=3):
+    scores = cosine_similarity(vec.transform([question]), doc_matrix)[0]
+    return [chunks[i] for i in scores.argsort()[::-1][:k]]
+
+question = "What is the suspected case definition for cholera?"
+context = "\n\n".join(retrieve(question))
+prompt = (f"Answer using only these excerpts. If the answer is not in them, "
+          f"say so.\n\n{context}\n\nQuestion: {question}")
+<span class="c"># then send `prompt` with client.messages.create(...) as in week 7</span></pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Build the assistant over 3–5 public guideline documents. Ask it 10 questions, including 3 whose answers are <i>not</i> in the documents. Does it say “I don't know”? Then replace TF-IDF with an open embedding model (e.g. <code>sentence-transformers</code>) and compare.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a “Guidelines assistant” page to EpiTracker. Every answer shows the passages it was based on.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="8"> I finished week 8</label>
+    </div>
+  </details>
+
+  <details class="week" id="w9" data-week="9">
+    <summary><span class="wk">WEEK 09</span><span class="sum-title"><h3>Tools and agents</h3><small>Letting the model ask your code for data</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">The model can't query your database, but it can <i>ask</i> your code to. You describe a tool (its name, what it does and what inputs it takes). The model replies “please call <code>get_weekly_cases</code> for district X”. Your code runs it and sends back the result, and the model writes the answer. An agent is this loop repeated until the task is done.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a manager who can't access the database but knows exactly which report to request from the data officer, reads it, then asks for the next one.</div>
+      <div class="block"><h4>Simple example: describing a tool</h4>
+<pre>tools = [{
+    "name": "get_weekly_cases",
+    "description": "Weekly case counts from EpiTracker for one district and disease.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "district": {"type": "string"},
+            "disease":  {"type": "string"},
+            "weeks":    {"type": "integer", "description": "How many recent weeks"},
+        },
+        "required": ["district", "disease"],
+    },
+}]
+
+<span class="c"># the loop: ask → model requests a tool → you run it → send the result → repeat</span>
+messages = [{"role": "user", "content": "Is cholera rising in District A?"}]
+while True:
+    response = client.messages.create(model="claude-opus-5", max_tokens=16000,
+                                      tools=tools, messages=messages)
+    if response.stop_reason != "tool_use":
+        break
+    messages.append({"role": "assistant", "content": response.content})
+    results = [{"type": "tool_result", "tool_use_id": b.id,
+                "content": str(run_tool(b.name, b.input))}
+               for b in response.content if b.type == "tool_use"]
+    messages.append({"role": "user", "content": results})</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Give the model 3 tools (weekly cases, alerts this week, forecast) and ask “Which districts need attention this week, and why?”. Log every tool call. Did it choose sensible tools?</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add an “Ask EpiTracker” box. Then write up your HEC Academy pipeline as a second agent case study: what each stage does and where a person checks the output.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="9"> I finished week 9</label>
+    </div>
+  </details>
+
+  <details class="week" id="w10" data-week="10">
+    <summary><span class="wk">WEEK 10</span><span class="sum-title"><h3>Evaluation: M&E for AI</h3><small>Gold sets, indicators, regression testing</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">This is the week where your background is rarest in the job market. Evaluating an AI system is monitoring and evaluation. You define indicators, build a reference dataset with known answers (a “gold set”), measure against it, and re-measure after every change. Most people who build AI tools skip this step.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> a logframe for your assistant. The indicator is “% of guideline questions answered correctly with a valid source”. The means of verification is a 40-question gold set. The target is 90%.</div>
+      <div class="block"><h4>Simple example</h4>
+<pre>gold = [
+    {"q": "Suspected cholera case definition?", "must_contain": "acute watery diarrhoea"},
+    {"q": "What is the incubation period of measles?", "must_contain": "10"},
+    {"q": "Dose of drug X for adults?", "must_contain": "not in the documents"},  <span class="c"># should refuse</span>
+    <span class="c"># … 40 questions in total</span>
+]
+correct = sum(g["must_contain"].lower() in ask(g["q"]).lower() for g in gold)
+print(f"Accuracy: {correct / len(gold):.0%}")</pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Build a 40-question gold set for your week-8 assistant. Track 3 indicators: accuracy, groundedness (is the answer supported by the cited passage?) and correct refusals. Change one thing, such as the chunk size, and measure again.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add an evaluation script that runs from the command line and prints a scorecard. Run it before every change you make to the assistant.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="10"> I finished week 10</label>
+    </div>
+  </details>
+</div>
+
+<!-- PHASE 4 -->
+<div class="phase" style="--pc:var(--p4)">
+  <div class="phase-head">
+    <div class="eyebrow">Weeks 11–12</div>
+    <h2>Responsible AI & portfolio</h2>
+    <p>Health employers ask about this before they ask about accuracy. Then you package everything so an employer can see it in five minutes.</p>
+  </div>
+
+  <details class="week" id="w11" data-week="11">
+    <summary><span class="wk">WEEK 11</span><span class="sum-title"><h3>Bias, privacy and human oversight</h3><small>Subgroup performance, de-identification, model cards</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">A model can look accurate overall and still fail one group. A classifier trained mostly on urban hospital data may miss cases in rural clinics. Always measure performance by subgroup. Health data is also sensitive: de-identify it before it leaves your system, respect your national data protection law and data-sharing agreements, and keep a person responsible for every decision.</p></div>
+      <div class="analogy"><b>Think of it like this:</b> you would never report national vaccination coverage without breaking it down by district. Hold models to the same standard.</div>
+      <div class="block"><h4>Simple example: sensitivity by subgroup</h4>
+<pre>test["pred"] = model.predict(X_test)
+positives = test[test["lab_confirmed"] == 1]
+print(positives.groupby("facility_type")["pred"].mean())   <span class="c"># sensitivity per group</span>
+<span class="c"># urban 0.88, rural 0.61  →  that gap is the finding</span></pre>
+      </div>
+      <div class="block"><h4>This week</h4>
+        <div class="task"><span class="tag ex">Exercise</span><p>Re-check your week-4 and week-5 models by district, sex and age group. Write a one-page <b>model card</b>: its purpose, the data used, performance overall and by subgroup, known limits, and who is responsible for acting on its output.</p></div>
+        <div class="task"><span class="tag build">Build</span><p>Add a de-identification step that removes names, phone numbers and exact addresses before any text is sent to an external API.</p></div>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="11"> I finished week 11</label>
+    </div>
+  </details>
+
+  <details class="week" id="w12" data-week="12">
+    <summary><span class="wk">WEEK 12</span><span class="sum-title"><h3>Capstone and portfolio</h3><small>Make the work visible</small></span><span class="chev">›</span></summary>
+    <div class="week-body">
+      <div class="block"><h4>The idea</h4><p class="prose">Employers hire from what they can see. Your capstone is EpiTracker as it stands now, with counts, forecasts, alerts, a guidelines assistant and an evaluation scorecard, presented so a hiring manager understands it in five minutes.</p></div>
+      <div class="block"><h4>What to deliver</h4>
+        <ul class="tight">
+          <li>A public GitHub repository with a README that has a screenshot and a “what problem this solves” section in its first 10 lines</li>
+          <li>A 3-minute screen-recorded demo</li>
+          <li>A 1,000-word case study covering the problem, approach, evaluation results, limits and what you'd do next</li>
+          <li>Your week-11 model card</li>
+          <li>A LinkedIn post that links to all of the above</li>
+        </ul>
+      </div>
+      <div class="block"><h4>Self-assessment rubric</h4>
+        <ul class="tight">
+          <li><b>Works:</b> someone else can run it by following your README</li>
+          <li><b>Measured:</b> every model and assistant reports a number against a baseline or gold set</li>
+          <li><b>Honest:</b> limits and subgroup gaps are stated, not hidden</li>
+          <li><b>Useful:</b> a district surveillance officer would want to open it on Monday morning</li>
+        </ul>
+      </div>
+      <label class="mark"><input type="checkbox" data-done="12"> I finished week 12</label>
+    </div>
+  </details>
+</div>
+
+<hr>
+
+<section id="delivery">
+  <div class="eyebrow">Delivery</div>
+  <h2>The best way to take this course</h2>
+  <p class="prose">Self-paced and project-based, with one project running through every week. Short courses that jump between unrelated toy datasets rarely stick, because nothing builds on anything. One project that grows each week gives you a reason to learn every topic and a portfolio at the end.</p>
+  <div class="two">
+    <div class="panel lead">
+      <h3>For you, learning alone</h3>
+      <ol class="rules">
+        <li><b>Protect the time.</b> Put two fixed blocks in your calendar every week, for example two weekday evenings and Saturday morning.</li>
+        <li><b>Use Claude as a tutor, not a ghostwriter.</b> Write your own attempt first, then ask for a review. Ask it to quiz you, or explain the concept back to it until it finds no gaps.</li>
+        <li><b>Type the examples, don't paste them.</b> Your fingers learn what your eyes skim past.</li>
+        <li><b>Keep a public build log.</b> Five lines a week on GitHub or LinkedIn. By week 12 it proves you stayed consistent.</li>
+        <li><b>Hold checkpoints in weeks 3, 6, 10 and 12.</b> If you're behind, cut the Build step, never the Exercise.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h3>If you later teach it to others</h3>
+      <p>You already build course platforms, so this could become a course you run through mecourse:</p>
+      <ul class="tight">
+        <li><b>A cohort of 10–25 people</b> starting together, so peers keep each other going</li>
+        <li><b>Blended format:</b> reading and short videos on your platform, plus a 90-minute live lab each week</li>
+        <li><b>Ready-to-run notebooks</b> (Google Colab) so nobody gets stuck installing software</li>
+        <li><b>Projects instead of quizzes:</b> assess the weekly builds and the capstone with the rubric above</li>
+        <li><b>Peer review</b> of each other's evaluation scorecards in week 10</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="kit">
+  <div class="eyebrow">Setup</div>
+  <h2>What you need</h2>
+  <div class="kit">
+    <div><h3>Software</h3><p>Python 3.11+, VS Code or Jupyter (Google Colab is fine), git and GitHub. Libraries: pandas, scikit-learn, Streamlit, <code>anthropic</code>, pydantic.</p></div>
+    <div><h3>Data</h3><p>Simulated line lists (safe, and you control the truth), the WHO Global Health Observatory, WHO FluNet, and the public DHIS2 demo instance.</p></div>
+    <div><h3>Budget</h3><p>Everything is free except the LLM API in weeks 7–10. At exercise scale, expect a few dollars in total. Set a spending limit in the API console.</p></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+  var KEY = "aiph-course-done";
+  var phases = ["p1","p1","p1","p2","p2","p2","p3","p3","p3","p3","p4","p4"];
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { done = {}; }
+
+  var track = document.getElementById("track");
+  for (var i = 1; i <= 12; i++) {
+    var a = document.createElement("a");
+    a.href = "#w" + i;
+    a.className = "cell";
+    a.style.setProperty("--pc", "var(--" + phases[i-1] + ")");
+    a.setAttribute("aria-label", "Week " + i);
+    a.innerHTML = "<span>" + String(i).padStart(2, "0") + "</span>";
+    a.addEventListener("click", (function(n){ return function(){ document.getElementById("w" + n).open = true; }; })(i));
+    track.appendChild(a);
+  }
+
+  function render(){
+    var count = 0;
+    Array.prototype.forEach.call(track.children, function(cell, idx){
+      var on = !!done[idx + 1];
+      cell.classList.toggle("done", on);
+      if (on) count++;
+    });
+    document.getElementById("progress").textContent = count + " of 12 weeks done";
+    document.querySelectorAll("details.week").forEach(function(d){
+      var n = d.getAttribute("data-week");
+      var h = d.querySelector("h3");
+      var m = h.querySelector(".donemark");
+      if (done[n] && !m) { m = document.createElement("span"); m.className = "donemark"; m.textContent = "done"; h.appendChild(m); }
+      if (!done[n] && m) m.remove();
+    });
+  }
+
+  document.querySelectorAll("input[data-done]").forEach(function(box){
+    var n = box.getAttribute("data-done");
+    box.id = "done-" + n;
+    box.checked = !!done[n];
+    box.addEventListener("change", function(){
+      done[n] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e) {}
+      render();
+    });
+  });
+  render();
+})();
+</script>
